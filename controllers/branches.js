@@ -10,10 +10,10 @@ export class BranchesController {
   getAll = async (req, res) => {
     try {
       const services = await this.model.findAll();
-      res.json(services);
+      res.status(200).json(services);
     }
     catch (e) {
-      console.log(e);
+      res.status(400).json({ error: 'Error al buscar'});
     }
   }
 
@@ -25,10 +25,10 @@ export class BranchesController {
           id_sucursal: id
         }
       });
-      res.json(instance);
+      res.status(200).json(instance);
     }
     catch (e) {
-      console.log(e);
+      res.status(400).json({ error: 'Error al buscar'});
     }
   }
 
@@ -53,7 +53,8 @@ export class BranchesController {
       res.status(201).json(instance);
     }
     catch (e) {
-      console.log(e);
+      console.log(this.model);
+      res.status(400).json({ error: 'Error al crear'});
     }
   }
 
@@ -66,34 +67,33 @@ export class BranchesController {
         }
       });
       if (result == 0) {
-        return res.status(404);
+        return res.status(404).json();
       }
+
       // es standard de REST que cuando se elimina un recurso se retorne 204 sin contenido/body
-      res.status(204);
+      res.status(204).json();
     }
     catch (e) {
-      console.log(e);
+      res.status(400).json({ error: 'Error al eliminar'});
     }
-
   }
 
   update = async (req, res) => {
     const result = branchSchema.partial().safeParse(req.body);
     if (!result.success) {
-      return res.status(400).json({
+      res.status(400).json({
         error: JSON.parse(result.error.message)
       });
     }
 
     const id = req.params.id;
     try {
-
       // en rest, los PATCH pueden ser parciales, es decir, no es necesario enviar todos los campos
       // por eso, se usa el partial() en el schema
       const result = await this.model.update(req.body, {where: { id_sucursal: id }});
 
       if (result == 0) {
-        return res.status(404);
+        res.status(404).json();
       }
 
       // es standard de REST que cuando se actualiza un recurso se retorne el recurso actualizado
@@ -101,7 +101,7 @@ export class BranchesController {
       res.status(200).json(instance);
     }
     catch (e) {
-      console.log(e);
+      res.status(400).json({ error: 'Error al actualizar'});
     }
 
   }
